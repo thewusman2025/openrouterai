@@ -1,0 +1,113 @@
+{
+  "dxt_version": "0.1",
+  "name": "openrouter-ai",
+  "version": "2.3.0",
+  "description": "MCP server for OpenRouter.ai integration with access to diverse AI models, provider routing controls, and unified response format",
+  "author": {
+    "name": "bossying"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "env": {
+        "OPENROUTER_API_KEY": "${user_config.openrouter_api_key}",
+        "OPENROUTER_DEFAULT_MODEL": "${user_config.default_model}",
+        "OPENROUTER_MAX_TOKENS": "${user_config.max_tokens}",
+        "OPENROUTER_PROVIDER_QUANTIZATIONS": "${user_config.provider_quantizations}",
+        "OPENROUTER_PROVIDER_IGNORE": "${user_config.provider_ignore}",
+        "OPENROUTER_PROVIDER_SORT": "${user_config.provider_sort}",
+        "OPENROUTER_PROVIDER_ORDER": "${user_config.provider_order}",
+        "OPENROUTER_PROVIDER_REQUIRE_PARAMETERS": "${user_config.provider_require_parameters}",
+        "OPENROUTER_PROVIDER_DATA_COLLECTION": "${user_config.provider_data_collection}",
+        "OPENROUTER_PROVIDER_ALLOW_FALLBACKS": "${user_config.provider_allow_fallbacks}"
+      }
+    }
+  },
+  "compatibility": {
+    "platforms": ["win32", "darwin", "linux"],
+    "node_version": ">=18.0.0"
+  },
+  "user_config": {
+    "openrouter_api_key": {
+      "type": "string",
+      "title": "OpenRouter API Key",
+      "description": "Your OpenRouter.ai API key from https://openrouter.ai/keys",
+      "sensitive": true
+    },
+    "default_model": {
+      "type": "string",
+      "title": "Default Model",
+      "description": "Default model to use if not specified in requests (e.g., openrouter/auto)",
+      "default": "openrouter/auto"
+    },
+    "max_tokens": {
+      "type": "number",
+      "title": "Maximum Tokens",
+      "description": "Default maximum number of tokens to generate",
+      "default": 1024,
+      "min": 1,
+      "max": 200000
+    },
+    "provider_quantizations": {
+      "type": "string",
+      "title": "Provider Quantizations",
+      "description": "Comma-separated list of quantization levels (e.g., fp16,int8)",
+      "default": ""
+    },
+    "provider_ignore": {
+      "type": "string",
+      "title": "Ignored Providers",
+      "description": "Comma-separated list of provider names to ignore (e.g., openai,anthropic)",
+      "default": ""
+    },
+    "provider_sort": {
+      "type": "string",
+      "title": "Provider Sort Order",
+      "description": "Default sort criteria for providers (price, throughput, or latency)",
+      "default": ""
+    },
+    "provider_order": {
+      "type": "string",
+      "title": "Provider Priority Order",
+      "description": "Comma-separated list of preferred provider IDs in priority order",
+      "default": ""
+    },
+    "provider_require_parameters": {
+      "type": "boolean",
+      "title": "Require Parameter Support",
+      "description": "Only use providers that support all specified request parameters",
+      "default": false
+    },
+    "provider_data_collection": {
+      "type": "string",
+      "title": "Data Collection Policy",
+      "description": "Default data collection preference (allow or deny)",
+      "default": ""
+    },
+    "provider_allow_fallbacks": {
+      "type": "boolean",
+      "title": "Allow Provider Fallbacks",
+      "description": "Allow fallback to other providers if preferred ones fail",
+      "default": true
+    }
+  },
+  "keywords": [
+    "mcp",
+    "openrouter",
+    "ai",
+    "llm",
+    "chat",
+    "completion",
+    "model",
+    "routing"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/heltonteixeira/openrouterai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heltonteixeira/openrouterai.git"
+  }
+}

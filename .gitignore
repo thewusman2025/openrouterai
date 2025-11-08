@@ -6,6 +6,7 @@
 .docs/
 .roo*
 .roo/*
+*.dxt
 
 # dependencies
 /node_modules

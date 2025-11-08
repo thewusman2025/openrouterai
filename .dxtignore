@@ -1,0 +1,56 @@
+# Source files
+src/
+*.ts
+tsconfig.json
+
+# Test files
+*.test.*
+test/
+tests/
+coverage/
+
+# Development dependencies
+node_modules/@types/
+node_modules/typescript/
+node_modules/shx/
+node_modules/@eslint/
+
+# Development tools and configs
+.eslintrc*
+.prettierrc*
+jest.config.*
+nodemon.json
+
+# Version control
+.git/
+.gitignore
+
+# Documentation
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+SOLUTIONS.md
+*.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CLI and AI files
+.claude/*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
