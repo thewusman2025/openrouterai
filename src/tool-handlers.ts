@@ -114,6 +114,27 @@ export class ToolHandlers {
                   type: 'number',
                   description: '(Optional) Sets an upper limit on the number of tokens generated in the response. Overrides the server default if specified. Influences provider routing based on model context limits.',
               },
+              search_recency_filter: {
+                type: 'string',
+                enum: ['hour', 'day', 'week', 'month', 'year'],
+                description: '(Optional, Perplexity Sonar) Restrict web search to results from a given recency window. Forwarded to upstream provider; ignored by non-Sonar models.',
+              },
+              search_domain_filter: {
+                type: 'array',
+                items: { type: 'string' },
+                description: '(Optional, Perplexity Sonar) Restrict web search to a list of allowed domains. Prefix a domain with "-" to exclude it (e.g. ["-reddit.com"]). Forwarded to upstream provider.',
+              },
+              web_search_options: {
+                type: 'object',
+                description: '(Optional, Perplexity Sonar) Web search tuning. Forwarded to upstream provider.',
+                properties: {
+                  search_context_size: {
+                    type: 'string',
+                    enum: ['low', 'medium', 'high'],
+                    description: 'Tradeoff between cost and depth of web grounding. Default depends on model.',
+                  },
+                },
+              },
               provider: {
                   type: 'object',
                   description: '(Optional) An object allowing fine-grained control over how OpenRouter selects the underlying AI provider for this request, overriding any server-level defaults.',

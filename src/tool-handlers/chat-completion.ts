@@ -9,18 +9,22 @@ export interface ChatCompletionToolRequest {
   model?: string;
   messages: ChatCompletionMessageParam[];
   temperature?: number;
-  max_tokens?: number;                  // Add max_tokens parameter
-  provider?: {                         // Add provider configuration
-      // Phase 1
-      quantizations?: string[];        // For quality filtering
-      ignore?: string[];               // Block specific providers
-      // Phase 2
-      sort?: "price" | "throughput" | "latency"; // Sort providers
-      order?: string[];                // Prioritized list of provider IDs
-      require_parameters?: boolean;    // Only use providers supporting all params
-      data_collection?: "allow" | "deny"; // Allow/deny data collection
-      allow_fallbacks?: boolean;       // Control fallback behavior
-  }
+  max_tokens?: number;
+  provider?: {
+      quantizations?: string[];
+      ignore?: string[];
+      sort?: "price" | "throughput" | "latency";
+      order?: string[];
+      require_parameters?: boolean;
+      data_collection?: "allow" | "deny";
+      allow_fallbacks?: boolean;
+  };
+  // Perplexity Sonar passthrough — fork addition for citation-grounded web search
+  search_recency_filter?: "hour" | "day" | "week" | "month" | "year";
+  search_domain_filter?: string[];
+  web_search_options?: {
+    search_context_size?: "low" | "medium" | "high";
+  };
 }
 
 // Utility function to estimate token count (simplified)
@@ -155,40 +159,39 @@ export async function handleChatCompletion(
     // Truncate messages to fit within context window
     const truncatedMessages = truncateMessagesToFit(args.messages, MAX_CONTEXT_TOKENS);
 
-    const completionRequest: OpenAI.Chat.Completions.ChatCompletionCreateParams = {
-      model, // Use the validated model
+    // Cast as `any` so Perplexity Sonar passthrough fields don't trip the OpenAI SDK type checker
+    const completionRequest: any = {
+      model,
       messages: truncatedMessages,
       temperature: args.temperature ?? 1,
-      // Add max_tokens if defined and valid
       ...(maxTokens !== undefined && !isNaN(maxTokens) && { max_tokens: maxTokens }),
-      // Add provider config if it has keys (now includes Phase 2)
       ...(Object.keys(providerConfig).length > 0 && { provider: providerConfig }),
+      // Perplexity Sonar passthrough — OpenRouter forwards these to the upstream provider
+      ...(args.search_recency_filter && { search_recency_filter: args.search_recency_filter }),
+      ...(args.search_domain_filter && args.search_domain_filter.length > 0 && { search_domain_filter: args.search_domain_filter }),
+      ...(args.web_search_options && { web_search_options: args.web_search_options }),
     };
 
-    // Log the request being sent (optional, for debugging)
-    // console.log("Sending request to OpenRouter:", JSON.stringify(completionRequest, null, 2));
+    const completion: any = await openai.chat.completions.create(completionRequest);
+    const choice = completion.choices[0];
 
-    const completion = await openai.chat.completions.create(completionRequest);
-
-    // Format response to match OpenRouter schema
+    // Preserve the full message object — including annotations[].url_citation from Sonar.
+    // The upstream package rebuilt this manually and dropped `annotations`, killing citations end-to-end.
     const response = {
-      id: `gen-${Date.now()}`,
+      id: completion.id ?? `gen-${Date.now()}`,
       choices: [{
-        finish_reason: completion.choices[0].finish_reason,
-        message: {
-          role: completion.choices[0].message.role,
-          content: completion.choices[0].message.content || '',
-          tool_calls: completion.choices[0].message.tool_calls
-        }
+        finish_reason: choice.finish_reason,
+        index: choice.index ?? 0,
+        message: choice.message,
       }],
-      created: Math.floor(Date.now() / 1000),
-      model: model,
-      object: 'chat.completion',
-      usage: completion.usage || {
+      created: completion.created ?? Math.floor(Date.now() / 1000),
+      model: completion.model ?? model,
+      object: completion.object ?? 'chat.completion',
+      usage: completion.usage ?? {
         prompt_tokens: 0,
         completion_tokens: 0,
-        total_tokens: 0
-      }
+        total_tokens: 0,
+      },
     };
 
     // Add isError: false to successful return
